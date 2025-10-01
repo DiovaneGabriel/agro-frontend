@@ -1,0 +1,17 @@
+services:
+  node:
+    container_name: agro-frontend
+    image: node:21.7.1-alpine
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - "3000:3000"
+    command: sh -c "if [ '$NODE_ENV' = 'production' ]; then npm run start; else npm run dev; fi"
+    networks:
+      agro:
+    restart: unless-stopped
+
+networks:
+  agro:
+    external: true
