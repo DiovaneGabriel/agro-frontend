@@ -19,7 +19,7 @@ update:
 
 install:
 	make build-image && \
-	docker run -it -v ./app:/app ${NODE_IMAGE} /bin/sh -c "npx create-next-app . && npm i" && \
+	docker run -it -v ./app:/app ${NODE_IMAGE} /bin/sh -c "npx create-next-app@14.2.31 . && npm i react@18 react-dom@18" && \
 	sudo chmod -R 777 . && \
 	mv ./app/* . && \
 	mv ./app/.eslintrc.json . && \
