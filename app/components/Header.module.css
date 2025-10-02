@@ -1,0 +1,16 @@
+.header{
+  width: 100%;
+  height: 10vh;
+  min-height: 100px;
+  background-color: var(--color-secondary);
+  display: flex;
+}
+
+.header .wrapper{
+  width: 50%;
+  margin: auto;
+}
+
+.header .wrapper input{
+  text-align: center;
+}
