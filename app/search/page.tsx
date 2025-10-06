@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { OptionProps, Select } from "dbarbieri-react-ui";
 import { supabase } from "@/lib/supabase/client";
 
-export default function Home() {
+const Search = () => {
 
   const searchParams = useSearchParams();
 
@@ -109,3 +109,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default Search;
