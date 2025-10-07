@@ -35,18 +35,17 @@ const Search = () => {
         p_rows_per_page: pageSize,
         p_page: page,
         p_search: search ?? null,
-        p_chemical_group_id: null,
-        p_active_ingredient_id: null,
-        p_class_id: null,
-        p_action_mechanism_id: null,
-        p_action_mode_id: null,
+
         p_culture_id: null,
+        p_class_id: null,
         p_prague_id: null,
         p_prague_common_name_id: null,
-        p_formulation_id: null,
+        p_action_mechanism_id: null,
+        p_active_ingredient_id: null,
+        p_action_mode_id: null,
+        p_registration_holder_id: null,
         p_toxicological_class_id: null,
         p_environmental_class_id: null,
-        p_brand_id: null,
       })
 
       // const total = count ?? 0
@@ -89,6 +88,7 @@ const Search = () => {
               <tr>
                 <th>Marca</th>
                 <th>Ingredientes Ativos</th>
+                <th>Mecanismos de Ação</th>
               </tr>
             </thead>
             <tbody>
@@ -97,6 +97,7 @@ const Search = () => {
                   <tr key={i}>
                     <td>{product.brand_name}</td>
                     <td>{product.active_ingredients}</td>
+                    <td>{product.action_mechanism}</td>
                   </tr>
 
                 );
