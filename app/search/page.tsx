@@ -3,8 +3,9 @@
 import { useSearchParams } from "next/navigation";
 import styles from "./page.module.css";
 import { useEffect, useState } from "react";
-import { OptionProps, Select } from "dbarbieri-react-ui";
+import { Loading, OptionProps, Select } from "dbarbieri-react-ui";
 import { supabase } from "@/lib/supabase/client";
+import SelectSupabase from "../components/SelectSupabase";
 
 const Search = () => {
 
@@ -25,6 +26,17 @@ const Search = () => {
   const [error, setError] = useState<string | null>(null)
   const [products, setProducts] = useState<any[]>([])
 
+  const [culture, setCulture] = useState<string>('')
+  const [agroClass, setAgroClass] = useState<string>('')
+  const [prague, setPrague] = useState<string>('')
+  const [pragueCommonName, setPragueCommonName] = useState<string>('')
+  const [actionMechanism, setActionMechanism] = useState<string>('')
+  const [activeIngredient, setActiveIngredient] = useState<string>('')
+  const [actionMode, setActionMode] = useState<string>('')
+  const [registrationHolder, setRegistrationHolder] = useState<string>('')
+  const [toxicologicalClass, setToxicologicalClass] = useState<string>('')
+  const [environmentalClass, setEnvironmentalClass] = useState<string>('')
+
   useEffect(() => {
     let active = true
 
@@ -36,20 +48,17 @@ const Search = () => {
         p_page: page,
         p_search: search ?? null,
 
-        p_culture_id: null,
-        p_class_id: null,
-        p_prague_id: null,
-        p_prague_common_name_id: null,
-        p_action_mechanism_id: null,
-        p_active_ingredient_id: null,
-        p_action_mode_id: null,
-        p_registration_holder_id: null,
-        p_toxicological_class_id: null,
-        p_environmental_class_id: null,
+        p_culture_id: culture ? culture : null,
+        p_class_id: agroClass ? agroClass : null,
+        p_prague_id: prague ? prague : null,
+        p_prague_common_name_id: pragueCommonName ? pragueCommonName : null,
+        p_action_mechanism_id: actionMechanism ? actionMechanism : null,
+        p_active_ingredient_id: activeIngredient ? activeIngredient : null,
+        p_action_mode_id: actionMode ? actionMode : null,
+        p_registration_holder_id: registrationHolder ? registrationHolder : null,
+        p_toxicological_class_id: toxicologicalClass ? toxicologicalClass : null,
+        p_environmental_class_id: environmentalClass ? environmentalClass : null,
       })
-
-      // const total = count ?? 0
-      // const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
       if (!active) return
       if (error) setError(error.message)
@@ -59,7 +68,7 @@ const Search = () => {
 
     load()
     return () => { active = false }
-  }, [page, search])
+  }, [page, search, culture, agroClass, prague, pragueCommonName, actionMechanism, activeIngredient, actionMode, registrationHolder, toxicologicalClass, environmentalClass])
 
   return (
     <div className={styles.page}>
@@ -67,45 +76,47 @@ const Search = () => {
         <h1>{search}</h1>
         <span>{products.length > 0 ? products[0].total_count : 'nenhum'} resultado{products.length > 1 ? 's' : ''}</span>
         <form>
-          <Select label="Grupo Químico" options={options}></Select>
-          <Select label="Ingrediente Ativo" options={options}></Select>
-          <Select label="Classe" options={options}></Select>
-          <Select label="Mecanismo de Ação" options={options}></Select>
-          <Select label="Modo de Ação" options={options}></Select>
-          <Select label="Cultura" options={options}></Select>
-          <Select label="Praga" options={options}></Select>
-          <Select label="Praga Nome Comum" options={options}></Select>
-          <Select label="Formulação" options={options}></Select>
-          <Select label="Classe Toxicológica" options={options}></Select>
-          <Select label="Classe Ambiental" options={options}></Select>
-          <Select label="Marca" options={options}></Select>
+          <SelectSupabase label="Cultura" table="cultures" value={culture} onChange={(e) => setCulture(e.target.value)} />
+          <SelectSupabase label="Classe" table="classes" value={agroClass} onChange={(e) => setAgroClass(e.target.value)} />
+          <SelectSupabase label="Praga / Alvo" table="pragues" value={prague} onChange={(e) => setPrague(e.target.value)} valueColumn="scientific_name" />
+          <SelectSupabase label="Praga / Alvo Nome Comum" table="prague_common_names" value={pragueCommonName} onChange={(e) => setPragueCommonName(e.target.value)} />
+          <SelectSupabase label="Mecanismo de Ação" table="action_mechanisms" value={actionMechanism} onChange={(e) => setActionMechanism(e.target.value)} />
+          <SelectSupabase label="Ingrediente Ativo" table="active_ingredients" value={activeIngredient} onChange={(e) => setActiveIngredient(e.target.value)} />
+          <SelectSupabase label="Modo de Ação" table="action_modes" value={actionMode} onChange={(e) => setActionMode(e.target.value)} valueColumn="description" />
+          <SelectSupabase label="Titular de Registro" table="registration_holders" value={registrationHolder} onChange={(e) => setRegistrationHolder(e.target.value)} />
+          <SelectSupabase label="Classe Toxicológica" table="toxicological_classes" value={toxicologicalClass} onChange={(e) => setToxicologicalClass(e.target.value)} />
+          <SelectSupabase label="Classe Ambiental" table="environmental_classes" value={environmentalClass} onChange={(e) => setEnvironmentalClass(e.target.value)} />
         </form>
       </div>
       <div className={styles.results}>
-        {products.length > 0 ?
-          <table>
-            <thead>
-              <tr>
-                <th>Marca</th>
-                <th>Ingredientes Ativos</th>
-                <th>Mecanismos de Ação</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product: any, i) => {
-                return (
-                  <tr key={i}>
-                    <td>{product.brand_name}</td>
-                    <td>{product.active_ingredients}</td>
-                    <td>{product.action_mechanism}</td>
+        {loading ? <Loading /> :
+          <>
+            {products.length > 0 ?
+              <table>
+                <thead>
+                  <tr>
+                    <th>Marca</th>
+                    <th>Ingredientes Ativos</th>
+                    <th>Mecanismos de Ação</th>
                   </tr>
+                </thead>
+                <tbody>
+                  {products.map((product: any, i) => {
+                    return (
+                      <tr key={i}>
+                        <td>{product.brand_name}</td>
+                        <td>{product.active_ingredients}</td>
+                        <td>{product.action_mechanism}</td>
+                      </tr>
 
-                );
-              })}
-            </tbody>
-          </table>
-          :
-          <i>Nenhum Registro Encontrado</i>}
+                    );
+                  })}
+                </tbody>
+              </table>
+              :
+              <i>Nenhum Registro Encontrado</i>}
+          </>
+        }
       </div>
     </div>
   );
