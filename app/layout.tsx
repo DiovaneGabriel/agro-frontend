@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Suspense } from "react";
 import { Loading } from "dbarbieri-react-ui";
+import Header from "./components/Header";
 
 export const metadata: Metadata = {
   title: "Create Next App",

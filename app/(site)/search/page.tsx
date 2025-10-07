@@ -3,9 +3,10 @@
 import { useSearchParams } from "next/navigation";
 import styles from "./page.module.css";
 import { useEffect, useState } from "react";
-import { Loading, OptionProps, Select } from "dbarbieri-react-ui";
+import { Loading } from "dbarbieri-react-ui";
 import { supabase } from "@/lib/supabase/client";
-import SelectSupabase from "../components/SelectSupabase";
+import SelectSupabase from "../../components/SelectSupabase";
+import Link from "next/link";
 
 const Search = () => {
 
@@ -15,7 +16,6 @@ const Search = () => {
   const pageSize = 20
 
   const [search, setSearch] = useState<string>(searchParams.get('s') || '');
-  const options: OptionProps[] = [{ key: "1", value: "test" }]
 
   useEffect(() => {
     setSearch(searchParams.get('s') || '');
@@ -104,9 +104,9 @@ const Search = () => {
                   {products.map((product: any, i) => {
                     return (
                       <tr key={i}>
-                        <td>{product.brand_name}</td>
-                        <td>{product.active_ingredients}</td>
-                        <td>{product.action_mechanism}</td>
+                        <td><Link href={`/product/${product.brand_id}`}>{product.brand_name}</Link></td>
+                        <td><Link href={`/product/${product.brand_id}`}>{product.active_ingredients}</Link></td>
+                        <td><Link href={`/product/${product.brand_id}`}>{product.action_mechanism}</Link></td>
                       </tr>
 
                     );
