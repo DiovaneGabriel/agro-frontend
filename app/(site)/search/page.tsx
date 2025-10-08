@@ -29,7 +29,7 @@ const Search = () => {
   const [culture, setCulture] = useState<string>('')
   const [agroClass, setAgroClass] = useState<string>('')
   const [prague, setPrague] = useState<string>('')
-  const [pragueCommonName, setPragueCommonName] = useState<string>('')
+  const [commonPrague, setCommonPrague] = useState<string>('')
   const [actionMechanism, setActionMechanism] = useState<string>('')
   const [activeIngredient, setActiveIngredient] = useState<string>('')
   const [actionMode, setActionMode] = useState<string>('')
@@ -51,7 +51,7 @@ const Search = () => {
         p_culture_id: culture ? culture : null,
         p_class_id: agroClass ? agroClass : null,
         p_prague_id: prague ? prague : null,
-        p_prague_common_name_id: pragueCommonName ? pragueCommonName : null,
+        p_common_prague_id: commonPrague ? commonPrague : null,
         p_action_mechanism_id: actionMechanism ? actionMechanism : null,
         p_active_ingredient_id: activeIngredient ? activeIngredient : null,
         p_action_mode_id: actionMode ? actionMode : null,
@@ -68,7 +68,7 @@ const Search = () => {
 
     load()
     return () => { active = false }
-  }, [page, search, culture, agroClass, prague, pragueCommonName, actionMechanism, activeIngredient, actionMode, registrationHolder, toxicologicalClass, environmentalClass])
+  }, [page, search, culture, agroClass, prague, commonPrague, actionMechanism, activeIngredient, actionMode, registrationHolder, toxicologicalClass, environmentalClass])
 
   return (
     <div className={styles.page}>
@@ -79,7 +79,7 @@ const Search = () => {
           <SelectSupabase label="Cultura" table="cultures" value={culture} onChange={(e) => setCulture(e.target.value)} />
           <SelectSupabase label="Classe" table="classes" value={agroClass} onChange={(e) => setAgroClass(e.target.value)} />
           <SelectSupabase label="Praga / Alvo" table="pragues" value={prague} onChange={(e) => setPrague(e.target.value)} valueColumn="scientific_name" />
-          <SelectSupabase label="Praga / Alvo Nome Comum" table="prague_common_names" value={pragueCommonName} onChange={(e) => setPragueCommonName(e.target.value)} />
+          <SelectSupabase label="Praga / Alvo Nome Comum" table="common_pragues" value={commonPrague} onChange={(e) => setCommonPrague(e.target.value)} />
           <SelectSupabase label="Mecanismo de Ação" table="action_mechanisms" value={actionMechanism} onChange={(e) => setActionMechanism(e.target.value)} />
           <SelectSupabase label="Ingrediente Ativo" table="active_ingredients" value={activeIngredient} onChange={(e) => setActiveIngredient(e.target.value)} />
           <SelectSupabase label="Modo de Ação" table="action_modes" value={actionMode} onChange={(e) => setActionMode(e.target.value)} valueColumn="description" />
