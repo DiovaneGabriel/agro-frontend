@@ -24,6 +24,8 @@ const Search = ({ params }: Props) => {
   const [actionModes, setActionModes] = useState<any[]>();
   const [companies, setCompanies] = useState<any[]>();
   const [pragues, setPragues] = useState<any[]>();
+  const [activeIngredients, setActiveIngredients] = useState<any[]>();
+
 
   const loadData = async (productId: number) => {
     const [
@@ -31,22 +33,26 @@ const Search = ({ params }: Props) => {
       { data: responseClasses, error: errorClasses },
       { data: responseActionModes, error: errorActionModes },
       { data: responseCompanies, error: errorCompanies },
-      { data: responsePragues, error: errorPragues }
+      { data: responsePragues, error: errorPragues },
+      { data: responseActiveIngredients, error: errorActiveIngredients }
     ] = await Promise.all([
       supabase.from('product_cultures').select('cultures(name)').order('cultures(name)').eq('product_id', productId),
       supabase.from('product_classes').select('classes(name)').order('classes(name)').eq('product_id', productId),
       supabase.from('product_action_modes').select('action_modes(description)').order('action_modes(description)').eq('product_id', productId),
       supabase.from('product_companies').select('companies(name,country:countries(name)),company_type:company_types(name)').order('companies(name)').eq('product_id', productId),
-      supabase.from('product_pragues').select('pragues(scientific_name)').order('pragues(scientific_name)').eq('product_id', productId)
+      supabase.from('product_pragues').select('pragues(scientific_name,prague_common_names(common_pragues(name)))').order('pragues(scientific_name)').eq('product_id', productId),
+      supabase.from('product_active_ingredients').select('concentration,active_ingredients(name,chemical_group:chemical_groups(name),active_ingredient_action_mechanisms(class_id,action_mechanisms(wssa,hrac,name)))').order('active_ingredients(name)').eq('product_id', productId)
     ])
 
-    if (!errorCultures && !errorClasses && !errorActionModes && !errorCompanies && !errorPragues) {
+    if (!errorCultures && !errorClasses && !errorActionModes && !errorCompanies && !errorPragues && !errorActiveIngredients) {
       setCultures(responseCultures);
       setClasses(responseClasses);
       setActionModes(responseActionModes);
       setCompanies(responseCompanies);
       setPragues(responsePragues);
+      setActiveIngredients(responseActiveIngredients);
       console.log(responsePragues);
+      // console.log(responseActiveIngredients);
     }
 
   }
@@ -112,6 +118,63 @@ const Search = ({ params }: Props) => {
                 <span>Titular de Registro:</span>
                 <p>{product.product.registration_holder.name}</p>
               </div>
+              {activeIngredients && activeIngredients.length !== 0 &&
+                <section className={styles.section}>
+                  <h2>Ingredientes Ativos</h2>
+                  <table
+                    style={{
+                      borderCollapse: "collapse",
+                      width: "100%",
+                      textAlign: "center",
+                    }}
+                  >
+                    <tbody>
+                      <thead>
+                        <tr>
+                          <th>Ingrediente Ativo</th>
+                          <th>Concentração</th>
+                          <th>Classe</th>
+                          <th>Mecanismo de Ação</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeIngredients.map((row: any, i: number) =>
+                          <tr key={i}>
+                            <td>{row.active_ingredients.name}</td>
+                            <td>{row.concentration}</td>
+                            {classes && classes.length !== 0 &&
+                              <td></td>
+                            }
+                          </tr>
+                        )}
+                      </tbody>
+                      {/* <tr>
+                        <td rowSpan={5}>Coluna 1(1 linha)</td>
+                        <td rowSpan={5}>Coluna 2(1 linha)</td>
+                        <td rowSpan={2}>Coluna 3(2 linhas)</td>
+                        <td>Coluna 4 - Linha 1</td>
+                      </tr>
+                      <tr>
+                        <td>Coluna 4 - Linha 2</td>
+                      </tr>
+                      <tr>
+                        <td rowSpan={3}></td>
+                        <td>Coluna 4 - Linha 3</td>
+                      </tr>
+                      <tr>
+                        <td>Coluna 4 - Linha 4</td>
+                      </tr>
+                      <tr>
+                        <td>Coluna 4 - Linha 5</td>
+                      </tr> */}
+                    </tbody>
+                  </table>
+
+                  {/* <ul className={styles.data}>
+                    {classes.map((row: any, i: number) => <li key={i}>{row.classes.name}</li>)}
+                  </ul> */}
+                </section>
+              }
               {classes && classes.length !== 0 &&
                 <section className={styles.section}>
                   <h2>Classes</h2>
@@ -148,10 +211,30 @@ const Search = ({ params }: Props) => {
                     </thead>
                     <tbody>
                       {pragues.map((row: any, i: number) =>
-                        <tr key={i}>
-                          <td>{row.pragues.scientific_name}</td>
-                          <td></td>
-                        </tr>
+                        <>
+                          <tr key={i}>
+                            <td rowSpan={row.pragues.prague_common_names.length || 1}>{row.pragues.scientific_name}</td>
+                            {
+                              row.pragues.prague_common_names.length !== 0 ?
+                                <td>{row.pragues.prague_common_names[0].common_pragues.name}</td>
+                                :
+                                <td>-</td>
+                            }
+                          </tr>
+                          {row.pragues.prague_common_names.length > 1 &&
+                            row.pragues.prague_common_names.map((cn: any, i: number) => {
+                              if (i > 0) {
+                                return (
+                                  <tr>
+                                    <td>
+                                      {cn.common_pragues.name}
+                                    </td>
+                                  </tr>);
+                              }
+                            }
+                            )
+                          }
+                        </>
                       )}
                     </tbody>
                   </table>

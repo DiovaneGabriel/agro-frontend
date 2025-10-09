@@ -32,7 +32,7 @@
   font-weight: bold;
 }
 
-.section{
+.section {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -42,4 +42,9 @@
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   gap: .5rem;
+}
+
+.page table td{
+  border: 1px solid #333;
+  padding: 8px;
 }
