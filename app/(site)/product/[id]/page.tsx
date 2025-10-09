@@ -37,10 +37,12 @@ const Search = ({ params }: Props) => {
       { data: responseActiveIngredients, error: errorActiveIngredients }
     ] = await Promise.all([
       supabase.from('product_cultures').select('cultures(name)').order('cultures(name)').eq('product_id', productId),
-      supabase.from('product_classes').select('classes(name)').order('classes(name)').eq('product_id', productId),
+      supabase.from('product_classes').select('classes(id,name)').order('classes(name)').eq('product_id', productId),
       supabase.from('product_action_modes').select('action_modes(description)').order('action_modes(description)').eq('product_id', productId),
       supabase.from('product_companies').select('companies(name,country:countries(name)),company_type:company_types(name)').order('companies(name)').eq('product_id', productId),
-      supabase.from('product_pragues').select('pragues(scientific_name,prague_common_names(common_pragues(name)))').order('pragues(scientific_name)').eq('product_id', productId),
+      supabase.from('product_pragues').select('pragues(scientific_name,prague_common_names(common_pragues(name)))')
+        .order('pragues(scientific_name)')
+        .eq('product_id', productId),
       supabase.from('product_active_ingredients').select('concentration,active_ingredients(name,chemical_group:chemical_groups(name),active_ingredient_action_mechanisms(class_id,action_mechanisms(wssa,hrac,name)))').order('active_ingredients(name)').eq('product_id', productId)
     ])
 
@@ -50,11 +52,56 @@ const Search = ({ params }: Props) => {
       setActionModes(responseActionModes);
       setCompanies(responseCompanies);
       setPragues(responsePragues);
-      setActiveIngredients(responseActiveIngredients);
-      console.log(responsePragues);
-      // console.log(responseActiveIngredients);
+
+      handleActiveIngredients(responseActiveIngredients, responseClasses);
     }
 
+  }
+
+  const handleActiveIngredients = (pActiveIngredients: any, pClasses: any) => {
+    const compiledRows = pActiveIngredients.map((row: any) => {
+      let cr = {
+        rowSpan: 0,
+        name: row.active_ingredients.name,
+        concentration: row.concentration,
+        chemical_group: row.active_ingredients.chemical_group.name,
+        classes: pClasses.map((rClass: any) => {
+          return {
+            rowSpan: 0,
+            name: rClass.classes.name,
+            action_mechanisms: row.active_ingredients.active_ingredient_action_mechanisms
+              .filter((aiam: any) => aiam.class_id == rClass.classes.id)
+              .map((aiam: any) => {
+                return {
+                  name: aiam.action_mechanisms.name,
+                  hrac: aiam.action_mechanisms.hrac,
+                  wssa: aiam.action_mechanisms.wssa
+                };
+              })
+          };
+        })
+      };
+
+      cr = {
+        ...cr,
+        classes: cr.classes.map((rClass: any) => {
+          return {
+            ...rClass,
+            rowSpan: rClass.action_mechanisms.length || 1
+          };
+        })
+      };
+
+      cr = {
+        ...cr,
+        rowSpan: cr.classes.reduce((sum: number, rClass: any) => sum + rClass.rowSpan, 0)
+      };
+
+      return cr;
+
+    });
+    console.log(compiledRows);
+    setActiveIngredients(compiledRows);
   }
 
   useEffect(() => {
@@ -121,58 +168,54 @@ const Search = ({ params }: Props) => {
               {activeIngredients && activeIngredients.length !== 0 &&
                 <section className={styles.section}>
                   <h2>Ingredientes Ativos</h2>
-                  <table
-                    style={{
-                      borderCollapse: "collapse",
-                      width: "100%",
-                      textAlign: "center",
-                    }}
-                  >
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Ingrediente Ativo</th>
+                        <th>Concentração</th>
+                        <th>Grupo Químico</th>
+                        <th>Classe</th>
+                        <th>Mecanismo de Ação</th>
+                        <th>HRAC</th>
+                        <th>WSSA</th>
+                      </tr>
+                    </thead>
                     <tbody>
-                      <thead>
-                        <tr>
-                          <th>Ingrediente Ativo</th>
-                          <th>Concentração</th>
-                          <th>Classe</th>
-                          <th>Mecanismo de Ação</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {activeIngredients.map((row: any, i: number) =>
+                      {/* TODO: precisará tem casos de mais de um mecanismo de ação por produto para poder testar isso*/}
+                      {activeIngredients.map((row: any, i: number) =>
+                        <>
                           <tr key={i}>
-                            <td>{row.active_ingredients.name}</td>
-                            <td>{row.concentration}</td>
-                            {classes && classes.length !== 0 &&
-                              <td></td>
+                            <td rowSpan={row.rowSpan}>{row.name}</td>
+                            <td rowSpan={row.rowSpan}>{row.concentration}</td>
+                            <td rowSpan={row.rowSpan}>{row.chemical_group}</td>
+                            {row.classes.length > 0 ?
+                              <>
+                                <td rowSpan={row.classes[0].rowSpan}>{row.classes[0].name}</td>
+                                {row.classes[0].action_mechanisms.length > 0 ?
+                                  <>
+                                    <td rowSpan={row.classes[0].rowSpan}>{row.classes[0].action_mechanisms[0].name}</td>
+                                    <td rowSpan={row.classes[0].rowSpan}>{row.classes[0].action_mechanisms[0].hrac}</td>
+                                    <td rowSpan={row.classes[0].rowSpan}>{row.classes[0].action_mechanisms[0].wssa}</td>
+                                  </> :
+                                  <>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                  </>}
+                              </>
+                              :
+                              <>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                              </>
                             }
                           </tr>
-                        )}
-                      </tbody>
-                      {/* <tr>
-                        <td rowSpan={5}>Coluna 1(1 linha)</td>
-                        <td rowSpan={5}>Coluna 2(1 linha)</td>
-                        <td rowSpan={2}>Coluna 3(2 linhas)</td>
-                        <td>Coluna 4 - Linha 1</td>
-                      </tr>
-                      <tr>
-                        <td>Coluna 4 - Linha 2</td>
-                      </tr>
-                      <tr>
-                        <td rowSpan={3}></td>
-                        <td>Coluna 4 - Linha 3</td>
-                      </tr>
-                      <tr>
-                        <td>Coluna 4 - Linha 4</td>
-                      </tr>
-                      <tr>
-                        <td>Coluna 4 - Linha 5</td>
-                      </tr> */}
+                        </>
+                      )}
                     </tbody>
                   </table>
-
-                  {/* <ul className={styles.data}>
-                    {classes.map((row: any, i: number) => <li key={i}>{row.classes.name}</li>)}
-                  </ul> */}
                 </section>
               }
               {classes && classes.length !== 0 &&

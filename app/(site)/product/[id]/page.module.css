@@ -44,6 +44,10 @@
   gap: .5rem;
 }
 
+.page table{
+  width: 100%;
+}
+
 .page table td{
   border: 1px solid #333;
   padding: 8px;
